@@ -1,0 +1,112 @@
+#home{
+
+
+    background-image: url(../../assets/img/back.jpg);
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: space-around;
+    height: 100vh;
+    width: 100vw;
+
+    section{
+        background-color: rgba(0,0,0,0.7);
+        border-radius: 5px;
+        padding-left: 2rem;
+        padding-right: 2rem;
+        height: 80%;
+        width: 35%;
+    }
+
+
+    .cube{
+        font-size: 7rem;
+        color: orange;
+     
+    }
+
+
+    h1 {
+        text-align: center;
+        color: #f8f8f8f8;
+        font-weight: 400;
+        font-size: 3rem;  
+    
+    }
+
+
+    .play-button-container{
+
+        width: 100%;
+    }
+
+
+    a.play-button{
+
+        background-color: #57b846;
+        color: #fff;
+        cursor: pointer;
+        padding: 1rem;
+        display: block;
+        border-radius: 30px;
+        text-align: center;
+        transition: 0.3s linear all;     
+    }
+
+    a.play-button:hover{
+        background-color: darken(#57b846,10%);
+        box-shadow: 0 2px 2px  0 rgba(0,0,0,0.14),0 3px 1px  -2px rgba(0,0,0,0.12),0 1px 5px 0 rgba(0,0,0,0.2);
+    }
+
+
+    .auth-container {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        margin-top: 3rem;
+
+    }
+
+    .auth-container .auth-buttons {
+        color: #fff;
+        cursor: pointer;
+        border-radius: 30px;    
+        padding: 1rem 0;
+        text-align: center;
+        width: 45%;
+        transition: 0.3s linear all; 
+    }
+
+    #login-button{
+        background-color: red;
+    }
+
+    #login-button:hover{
+        background-color: darken(red,10%);
+        box-shadow: 0 2px 2px  0 rgba(0,0,0,0.14),0 3px 1px  -2px rgba(0,0,0,0.12),0 1px 5px 0 rgba(0,0,0,0.2);
+
+       
+    }
+
+    #signup-button{
+        background-color:  #1dfaf2;
+    }
+
+    #signup-button:hover{
+        background-color: darken(#1dfaf2,10%);
+        box-shadow: 0 2px 2px  0 rgba(0,0,0,0.14),0 3px 1px  -2px rgba(0,0,0,0.12),0 1px 5px 0 rgba(0,0,0,0.2);
+
+  
+
+    }
+} 
+
+@media(max-width:768px){
+
+    #home section {
+
+        padding: 0 1rem;
+        width: 100%;
+        height: 100%;
+    }
+}
