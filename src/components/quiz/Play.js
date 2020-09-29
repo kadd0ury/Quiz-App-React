@@ -19,7 +19,7 @@ class Play extends React.Component {
             nextQuestion: {},
             previousQuestion: {},
             answer: '',
-            numberOfQuestions: 0,
+            numberOfQuestions: 1,
             numberOfAnswerQuestion: 0,
             currentQuestionIndex: 0,
             score: 0,
@@ -85,6 +85,7 @@ class Play extends React.Component {
             correctAnwers: prevState.correctAnwers + 1,
             currentQuestionIndex: prevState.currentQuestionIndex + 1,
             numberOfAnswerQuestion: prevState.numberOfAnswerQuestion + 1,
+            numberOfQuestions: this.state.numberOfQuestions + 1
 
         }), () => {
             this.displayQuestions(
@@ -106,7 +107,8 @@ class Play extends React.Component {
         this.setState(prevState => ({
             wrongAnswers: prevState.wrongAnswers + 1,
             currentQuestionIndex: prevState.currentQuestionIndex + 1,
-            numberOfAnswerQuestion: prevState.numberOfAnswerQuestion + 1
+            numberOfAnswerQuestion: prevState.numberOfAnswerQuestion + 1,
+            numberOfQuestions: this.state.numberOfQuestions + 1
         }), () => {
             this.displayQuestions(
                 this.state.questions,
@@ -116,6 +118,75 @@ class Play extends React.Component {
             );
 
         })
+    }
+
+    handleNextButton = () => {
+        this.playButtonSound();
+        if (this.state.nextQuestion !== undefined) {
+            this.setState(prevState => ({
+                currentQuestionIndex: prevState.currentQuestionIndex + 1,
+                numberOfQuestions: this.state.numberOfQuestions + 1
+            }), () => {
+                this.displayQuestions(
+                    this.state.questions,
+                    this.state.currentQuestion,
+                    this.state.nextQuestion,
+                    this.state.previousQuestion
+                );
+            });
+        }
+    }
+
+
+    handlePreviousButton = () => {
+        this.playButtonSound();
+        if (this.state.previousQuestion !== undefined) {
+            this.setState(prevState => ({
+                currentQuestionIndex: prevState.currentQuestionIndex - 1,
+                numberOfQuestions: this.state.numberOfQuestions - 1
+            }), () => {
+                this.displayQuestions(
+                    this.state.questions,
+                    this.state.currentQuestion,
+                    this.state.nextQuestion,
+                    this.state.previousQuestion
+                );
+            });
+        }
+    }
+
+    handleQuitButton = () => {
+        this.playButtonSound();
+        if (window.confirm('are you sure you want to quit ?')){
+            this.props.history.push('/');
+        }
+    }
+
+    handleButtonClick = (e) => {
+        switch (e.target.id) {
+
+            default:
+                break
+            case 'next-button':
+                this.handleNextButton();
+                break;
+            case 'previous-button':
+                this.handlePreviousButton();
+                break;
+            case 'quit-button':
+                this.handleQuitButton();
+                break;
+
+
+
+        }
+
+
+
+    }
+
+    playButtonSound = () => {
+        document.getElementById('button-sound').play();
     }
 
 
@@ -154,7 +225,7 @@ class Play extends React.Component {
                     <div>
                         <p>
 
-                            <span className="left">1 of 15 </span>
+                            <span className="left">{this.state.numberOfQuestions} of {this.state.questions.length} </span>
                             <span className="right">2:15<span><i style={{ position: "relative", left: "4px" }} className="fa fa-clock-o" aria-hidden="true"></i></span></span>
                         </p>
                     </div>
@@ -174,14 +245,12 @@ class Play extends React.Component {
                     </div>
 
                     <div className="button-container">
-                        <button>Previous</button>
-                        <button>Next</button>
-                        <button>Quit</button>
+                        <button id="previous-button" onClick={this.handleButtonClick}>Previous</button>
+                        <button id="next-button" onClick={this.handleButtonClick} >Next</button>
+                        <button id="quit-button" onClick={this.handleButtonClick} >Quit</button>
                     </div>
 
                 </div>
-
-
             </Fragment>
         )
     }
