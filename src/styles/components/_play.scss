@@ -119,6 +119,12 @@
 
 .lifeline-icon {
 
-
+    cursor: pointer;
     color:#57b846 ;
+}
+
+.lifeline-icon:hover {
+
+    color: darken(orange, 10%);
+    background: none;
 }

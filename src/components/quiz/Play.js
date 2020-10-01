@@ -1,5 +1,4 @@
 import React, { Fragment } from 'react'
-import { isElementOfType } from 'react-dom/test-utils';
 import Helmet from 'react-helmet'
 import questions from '../../questions.json'
 import isEmpty from '../../utils/is-empty'
@@ -27,9 +26,14 @@ class Play extends React.Component {
             wrongAnswers: 0,
             hint: 5,
             fiftyFifty: 2,
-            userFiftyFifty: false,
-            time: {}
+            usedFiftyFifty: false,
+            time: {},
+            previousRandomNumbers: [],
+            isRed : false
+
         };
+
+        this.interval = null;
     }
 
     //cQ:currentQuestion,nQ :nextQuestion ,pQ:previousQuestion
@@ -46,13 +50,18 @@ class Play extends React.Component {
                 currentQuestion: cQ,
                 nextQuestion: nQ,
                 previousQuestion: pQ,
-                answer: answer
+                answer: answer,
+                previousRandomNumbers: [],
+                usedFiftyFifty: false
+            }, () => {
+                this.showOptions();
             })
         }
     }
 
     componentDidMount() {
         this.displayQuestions();
+        this.startTimer();
     }
 
     handleOptionClick = (e) => {
@@ -157,7 +166,7 @@ class Play extends React.Component {
 
     handleQuitButton = () => {
         this.playButtonSound();
-        if (window.confirm('are you sure you want to quit ?')){
+        if (window.confirm('are you sure you want to quit ?')) {
             this.props.history.push('/');
         }
     }
@@ -176,28 +185,123 @@ class Play extends React.Component {
             case 'quit-button':
                 this.handleQuitButton();
                 break;
-
-
-
         }
-
-
-
     }
-
     playButtonSound = () => {
         document.getElementById('button-sound').play();
     }
 
 
+    showOptions = () => {
+        const options = Array.from(document.querySelectorAll('.option'));
+        options.forEach(option => {
+            option.style.visibility = 'visible';
+        })
+
+    }
+
+    handleHintsClick = () => {
+        if (this.state.hint > 0) {
+            const options = Array.from(document.querySelectorAll('.option'));
+            let indexAnswer;
+            options.forEach((option, index) => {
+                if (option.innerHTML.toLowerCase() === this.state.answer.toLowerCase()) {
+                    indexAnswer = index;
+                }
+            });
+
+            while (true) {
+                const randomNumber = Math.round(Math.random() * 3);
+                if (randomNumber !== indexAnswer && !this.state.previousRandomNumbers.includes(randomNumber)) {
+                    options.forEach((option, index) => {
+                        if (index === randomNumber) {
+                            option.style.visibility = 'hidden';
+                            this.setState((prevState) => ({
+                                hint: prevState.hint - 1,
+                                previousRandomNumbers: prevState.previousRandomNumbers.concat(randomNumber)
+                            }));
+                        }
+                    })
+                    break;
+                }
+                if (this.state.previousRandomNumbers.length >= 3) break;
+            }
+
+        }
+
+    }
 
 
+    handleFiftyFiftyClick = () => {
+
+        if (this.state.fiftyFifty > 0 && this.state.usedFiftyFifty === false) {
+
+            const { answer } = this.state;
+            let indexAnswers = [];
+            let indexAnswer;
+            const options = Array.from(document.querySelectorAll('.option'));
+            options.forEach((option, index) => {
+                if (option.innerHTML.toLowerCase() === answer.toLowerCase()) {
+                    indexAnswer = index;
+                }
+            })
+            while (indexAnswers.length < 2) {
+                const choice = Math.floor(Math.random() * 4);
+                if (choice !== indexAnswer && !indexAnswers.includes(choice)) {
+                    indexAnswers.push(choice);
+                }
+            }
+            options[indexAnswers[0]].style.visibility = 'hidden';
+            options[indexAnswers[1]].style.visibility = 'hidden';
+            this.setState({
+                fiftyFifty: this.state.fiftyFifty - 1,
+                usedFiftyFifty: true
+            })
+
+        }
 
 
+    }
+
+
+    startTimer = () => {
+        const countDown = Date.now() + 30000;
+        this.interval = setInterval(() => {
+            const now = new Date();
+            const distance = countDown - now;
+            const minutes = Math.floor(distance / (1000 * 60));
+            const seconds = Math.floor(distance / 1000);
+
+            if (distance < 0) {
+                clearInterval(this.interval);
+                this.setState({
+                    time: {
+                        mminutes: 0,
+                        seconds: 0
+                    }
+                }, () => {
+                    alert('Quiz ended !');
+                    this.props.history.push('/');
+                })
+            }
+            else {
+                this.setState({
+                    time: {
+                        minutes,
+                        seconds
+                    }
+                })
+            }
+            if (seconds < 10 && seconds >=0){
+                document.getElementById('red').style.color='#DC143C';
+            }
+        
+        }, 1000)
+    }
 
     render() {
 
-        const { currentQuestion } = this.state
+        const { currentQuestion, hint } = this.state
         return (
             <Fragment>
                 <Helmet><title>Quiz Page</title></Helmet>
@@ -211,13 +315,13 @@ class Play extends React.Component {
                     <div className="lifeline-container">
                         <p>
 
-                            <span className="lifeline-icon"><i className="fa fa-hand-peace-o" aria-hidden="true"></i></span>
-                            <span className="lifeline">2</span>
+                            <span onClick={this.handleFiftyFiftyClick} className="lifeline-icon"><i className="fa fa-hand-peace-o" aria-hidden="true"></i></span>
+                            <span className="lifeline">{this.state.fiftyFifty}</span>
                         </p>
 
                         <p>
-                            <span style={{ position: "relative", left: "-6px" }} className="lifeline">5</span>
-                            <span className="lifeline-icon"><i className="fa fa-lightbulb-o" aria-hidden="true"></i></span>
+                            <span style={{ position: "relative", left: "-6px" }} className="lifeline">{hint}</span>
+                            <span id="option" onClick={this.handleHintsClick} className="lifeline-icon"><i className="fa fa-lightbulb-o" aria-hidden="true"></i></span>
 
                         </p>
                     </div>
@@ -226,20 +330,20 @@ class Play extends React.Component {
                         <p>
 
                             <span className="left">{this.state.numberOfQuestions} of {this.state.questions.length} </span>
-                            <span className="right">2:15<span><i style={{ position: "relative", left: "4px" }} className="fa fa-clock-o" aria-hidden="true"></i></span></span>
+                            <span id ="red" className="right">{this.state.time.minutes}:{this.state.time.seconds}<span><i style={{ position: "relative", left: "4px" }} className="fa fa-clock-o" aria-hidden="true"></i></span></span>
                         </p>
                     </div>
 
                     <h5>{currentQuestion.question}?</h5>
                     <div className="options-container">
 
-                        <p onClick={this.handleOptionClick} className="option">{currentQuestion.optionA}</p>
-                        <p onClick={this.handleOptionClick} className="option">{currentQuestion.optionB}</p>
+                        <p id={currentQuestion.optionA} onClick={this.handleOptionClick} className="option">{currentQuestion.optionA}</p>
+                        <p id={currentQuestion.optionB} onClick={this.handleOptionClick} className="option">{currentQuestion.optionB}</p>
 
                     </div>
                     <div className="options-container">
-                        <p onClick={this.handleOptionClick} className="option">{currentQuestion.optionC}</p>
-                        <p onClick={this.handleOptionClick} className="option">{currentQuestion.optionD}</p>
+                        <p id={currentQuestion.optionC} onClick={this.handleOptionClick} className="option">{currentQuestion.optionC}</p>
+                        <p id={currentQuestion.optionD} onClick={this.handleOptionClick} className="option">{currentQuestion.optionD}</p>
 
 
                     </div>

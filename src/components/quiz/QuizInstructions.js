@@ -65,7 +65,7 @@ const QuizInstructions = () => (
                     </span>
                 <span className="right"><Link to="/play/Quiz">
                     Okay let's go
-                    <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+                    <i className="fa fa-hand-o-right" aria-hidden="true"></i>
                     </Link>
                
                     </span>
