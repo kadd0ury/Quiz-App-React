@@ -59,7 +59,7 @@ const QuizInstructions = () => (
             </ul>
             <div style={{ marginBottom: "39px" }}>
                 <span className="left"><Link to="/">
-                <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+                <i className="fa fa-hand-o-left" aria-hidden="true"></i>
                     No take Me Back !
                     </Link>
                     </span>

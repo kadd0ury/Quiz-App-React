@@ -22,3 +22,10 @@ body{
     border-radius: 5px !important;
     color: #fff !important;
 }
+.disable{
+
+   pointer-events: none !important;
+    background-color: #ccc !important;
+    box-shadow: none !important;
+    opacity: 1.9 !important;
+}

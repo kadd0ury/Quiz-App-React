@@ -6,6 +6,7 @@ import M from 'materialize-css';
 import correctNotifocation from '../../assets/audio/correct-answer.mp3';
 import wrongNotification from '../../assets/audio/wrong-answer.mp3';
 import buttonSound from '../../assets/audio/button-sound.mp3';
+import classnames from 'classnames';
 
 
 class Play extends React.Component {
@@ -29,7 +30,10 @@ class Play extends React.Component {
             usedFiftyFifty: false,
             time: {},
             previousRandomNumbers: [],
-            isRed : false
+            isRed: false,
+            nextButtonDisabled: false,
+            PreviousButtonDisabled: true,
+
 
         };
 
@@ -55,6 +59,7 @@ class Play extends React.Component {
                 usedFiftyFifty: false
             }, () => {
                 this.showOptions();
+                this.handleDisabledButton()
             })
         }
     }
@@ -63,6 +68,13 @@ class Play extends React.Component {
         this.displayQuestions();
         this.startTimer();
     }
+
+    componentWillUnmount(){
+
+        clearInterval(this.interval);
+    }
+
+
 
     handleOptionClick = (e) => {
 
@@ -97,12 +109,19 @@ class Play extends React.Component {
             numberOfQuestions: this.state.numberOfQuestions + 1
 
         }), () => {
-            this.displayQuestions(
-                this.state.questions,
-                this.state.currentQuestion,
-                this.state.nextQuestion,
-                this.state.previousQuestion
-            );
+
+            if (this.state.nextQuestion === undefined) {
+                this.endGame();
+            }
+            else {
+                this.displayQuestions(
+                    this.state.questions,
+                    this.state.currentQuestion,
+                    this.state.nextQuestion,
+                    this.state.previousQuestion
+                );
+            }
+           
         })
     }
 
@@ -119,13 +138,18 @@ class Play extends React.Component {
             numberOfAnswerQuestion: prevState.numberOfAnswerQuestion + 1,
             numberOfQuestions: this.state.numberOfQuestions + 1
         }), () => {
-            this.displayQuestions(
-                this.state.questions,
-                this.state.currentQuestion,
-                this.state.nextQuestion,
-                this.state.previousQuestion
-            );
 
+            if (this.state.nextQuestion === undefined) {
+                this.endGame();
+            }
+            else {
+                this.displayQuestions(
+                    this.state.questions,
+                    this.state.currentQuestion,
+                    this.state.nextQuestion,
+                    this.state.previousQuestion
+                );
+            }
         })
     }
 
@@ -162,6 +186,11 @@ class Play extends React.Component {
                 );
             });
         }
+
+
+
+
+
     }
 
     handleQuitButton = () => {
@@ -265,7 +294,7 @@ class Play extends React.Component {
 
 
     startTimer = () => {
-        const countDown = Date.now() + 30000;
+        const countDown = Date.now() + 60000;
         this.interval = setInterval(() => {
             const now = new Date();
             const distance = countDown - now;
@@ -280,8 +309,7 @@ class Play extends React.Component {
                         seconds: 0
                     }
                 }, () => {
-                    alert('Quiz ended !');
-                    this.props.history.push('/');
+                    this.endGame();
                 })
             }
             else {
@@ -292,15 +320,48 @@ class Play extends React.Component {
                     }
                 })
             }
-            if (seconds < 10 && seconds >=0){
-                document.getElementById('red').style.color='#DC143C';
+            if (seconds < 10 && seconds >=0) {
+                document.getElementById('red').style.color = '#DC143C';
             }
-        
+
         }, 1000)
     }
 
-    render() {
 
+    handleDisabledButton = () => {
+
+        if (this.state.previousQuestion === undefined || this.state.currentQuestionIndex === 0) {
+            this.setState({
+                PreviousButtonDisabled: true
+            })
+        }
+        else { this.setState({ PreviousButtonDisabled: false }) }
+
+        if (this.state.nextQuestion === undefined) {
+            this.setState({
+                nextButtonDisabled: true
+            })
+        }
+        else { this.setState({ nextButtonDisabled: false }) }
+    }
+
+    endGame = () => {
+        alert('Quiz ended !');
+        const playerStatus = {
+            score: this.state.score,
+            numberOfQuestions: this.state.questions.length,
+            numberOfAnswerQuestion: this.state.numberOfAnswerQuestion,
+            correctAnwer: this.state.correctAnwers,
+            wrongAnswer: this.state.wrongAnswers,
+            fiftyUsed: 2 - this.state.fiftyFifty,
+            hintUsed: 5 - this.state.hint
+        };
+        console.log(playerStatus);
+        setTimeout(() => {
+            this.props.history.push('/Quiz/summary',playerStatus);
+        }, 1000)
+    }
+    render() {
         const { currentQuestion, hint } = this.state
         return (
             <Fragment>
@@ -330,7 +391,7 @@ class Play extends React.Component {
                         <p>
 
                             <span className="left">{this.state.numberOfQuestions} of {this.state.questions.length} </span>
-                            <span id ="red" className="right">{this.state.time.minutes}:{this.state.time.seconds}<span><i style={{ position: "relative", left: "4px" }} className="fa fa-clock-o" aria-hidden="true"></i></span></span>
+                            <span id="red" className="right lifeline-icon">{this.state.time.minutes}:{this.state.time.seconds}<span><i style={{ position: "relative", left: "4px" }} className="fa fa-clock-o" aria-hidden="true"></i></span></span>
                         </p>
                     </div>
 
@@ -349,8 +410,18 @@ class Play extends React.Component {
                     </div>
 
                     <div className="button-container">
-                        <button id="previous-button" onClick={this.handleButtonClick}>Previous</button>
-                        <button id="next-button" onClick={this.handleButtonClick} >Next</button>
+                        <button
+                            className={classnames('', { 'disable': this.state.PreviousButtonDisabled })}
+                            id="previous-button"
+                            onClick={this.handleButtonClick}
+                        >Previous
+                         </button>
+                        <button
+                            className={classnames('', { 'disable': this.state.nextButtonDisabled })}
+                            id="next-button"
+                            onClick={this.handleButtonClick} >
+                            Next
+                            </button>
                         <button id="quit-button" onClick={this.handleButtonClick} >Quit</button>
                     </div>
 
@@ -359,6 +430,4 @@ class Play extends React.Component {
         )
     }
 }
-
-
 export default Play
